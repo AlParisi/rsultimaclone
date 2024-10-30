@@ -1,6 +1,6 @@
 # Ultima Online Console Clone in Rust
 
-A simple **Ultima Online** clone designed for the console, developed in **Rust** to explore the basics of the language and delve into retro-style command-line game programming.
+A simple **Ultima Online** clone designed for the console, developed in **Rust** to explore the basics of the language building a retro-style command-line game programming.
 
 This project simulates some essential mechanics of a grid-based RPG game, with a **player** who moves on a map, interacts with **NPCs** (non-playable characters), and trains to increase their stats. The game doesn’t have a predefined ending but includes some simple interactions and basic functionalities, and is designed to be extendable.
 
