@@ -22,6 +22,30 @@ The project is organized into folders for easy code management and extension:
     - `tile.rs`: defines the contents of each map tile (empty, player, NPC).
     - `maps.rs`: manages the map structure, positioning, and movement of entities.
 
+## Basic Interface and Command Functionality
+
+### Ratatui-Based Interface
+
+We’ve integrated a basic UI for the game using the [Ratatui](https://ratatui.rs) library to improve the visual experience in the command-line console. The interface layout is divided into three main sections:
+
+1. **Map Display**: The main view, showing the player's location, NPCs, and other map details. This area dynamically adjusts its size based on the terminal window to fit available space, ensuring an optimal view of the player’s surroundings.
+
+2. **Player Stats Panel**: Located to the right of the map, this panel displays the player's name, health, strength, agility, and experience, providing an at-a-glance summary of the player’s status.
+
+3. **Command Window**: Located at the bottom, this area allows the player to interact with the game through commands. It displays log messages and accepts specific commands for advanced interactions, like engaging in combat.
+
+### Real-Time Command Functionality
+
+To improve the gameplay experience, we’ve implemented real-time movement commands as well as dedicated command handling for combat actions. Here’s how commands work:
+
+- **Movement**: The player can move in real-time by pressing the `w`, `a`, `s`, `d` keys without needing to hit `Enter`. Each keypress immediately updates the player's position on the map.
+
+- **Combat Commands**: Specific commands like `engage` and `fight` are entered in the Command Window and require pressing `Enter` to execute. These commands enable the player to interact with NPCs, start fights, and engage in combat.
+
+This structure ensures a smoother gameplay experience, with instant responses to movement inputs while preserving the Command Window for complex interactions.
+
+
+
 ## Running the Project
 To start the project:
 1. Clone the repository.

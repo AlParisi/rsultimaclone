@@ -1,4 +1,6 @@
+use crate::entities::npc::NPC;
 use crate::inventory::item::Item;
+use crate::maps::maps::Maps;
 
 pub struct Player {
     pub name: String,
@@ -10,8 +12,8 @@ pub struct Player {
     pub agility: i32,
     pub charisma: i32,
     pub inventory: Vec<Item>,
-    pub position: (i32, i32),
-    pub map_limits: (i32, i32),
+    pub position: (usize, usize),
+    pub map_limits: (usize, usize),
     pub status: PlayerStatus
 }
 
@@ -23,7 +25,7 @@ pub enum PlayerStatus {
     Injured,
 }
 impl Player {
-    pub fn new(name: &str, x: (i32, i32)) -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             health: 100,
@@ -34,13 +36,13 @@ impl Player {
             agility: 8,
             charisma: 5,
             inventory: Vec::new(),
-            position: (0, 0),
+            position: (1, 1),
             map_limits: (100, 100),
             status: PlayerStatus::Normal,
         }
     }
 
-    pub fn move_player(&mut self, dx: i32, dy: i32) {
+    pub fn move_player(&mut self, dx: usize, dy: usize) {
         let new_x = self.position.0 + dx;
         let new_y = self.position.1 + dy;
 
@@ -73,35 +75,6 @@ impl Player {
         println!("Congratulation! You achieved a level up: now your level is {}.", self.level);
     }
 
-    pub fn add_item(&mut self, item: Item) {
-        println!("You found a new item: {}.", item.name);
-        self.inventory.push(item);
-    }
-
-    pub fn use_item(&mut self, item_name: &str) {
-        if let Some(index) = self.inventory.iter().position(|item| item.name == item_name) {
-            let item = self.inventory.remove(index);
-            println!("You used item: {}.", item.name);
-            self.apply_item_effect(&item);
-        } else {
-            println!("Object not found on inventary.");
-        }
-    }
-
-    fn apply_item_effect(&mut self, item: &Item) {
-        match item.name.as_str() {
-            "Health Potion" => {
-                self.health += 20;
-                println!("Your health is increased by 20 points. Current health: {}.", self.health);
-            },
-            "Mana Potion" => {
-                self.mana += 15;
-                println!("Your mana increased by 15 points. Current Mana: {}.", self.mana);
-            },
-            _ => println!("Object not useful"),
-        }
-    }
-
     pub fn set_status(&mut self, status: PlayerStatus) {
         self.status = status;
         println!("Your current status is: {:?}", self.status);
@@ -113,6 +86,69 @@ impl Player {
             PlayerStatus::InCombat => println!("You are in a fight!"),
             PlayerStatus::Exhausted => println!("You are exhausted and need rest."),
             PlayerStatus::Injured => println!("You are hurt and you need to heal."),
+        }
+    }
+
+    fn attack(&self) -> i32 {
+        self.strength
+    }
+
+    pub fn engage_in_combat(&mut self, npc: &mut NPC) -> String{
+        let mut combat_log = String::new();
+
+        loop {
+            // player attack
+            let player_damage = self.attack();
+            npc.health -= player_damage;
+            combat_log.push_str(&format!("You dealt {} damage to the NPC!\n", player_damage));
+
+            if npc.health <= 0 {
+                combat_log.push_str("You defeated the NPC!\n");
+                break;
+            }
+
+            // NPC attack
+            let npc_damage = npc.attack();
+            self.health -= npc_damage;
+            combat_log.push_str(&format!("The NPC dealt {} damage to you!\n", npc_damage));
+
+            if self.health <= 0 {
+                combat_log.push_str("You were defeated by the NPC!\n");
+                break;
+            }
+        }
+
+        combat_log
+    }
+
+    pub fn train_player(player: &mut Player) {
+        println!("You train to improve your strength and agility.");
+        player.strength += 1;
+        player.agility += 1;
+        println!("Your strength is now {} and your agility is now {}.", player.strength, player.agility);
+    }
+
+    pub fn move_up(&mut self, map: &Maps) {
+        if self.position.1 > 0 && map.is_empty(self.position.0, self.position.1 - 1) {
+            self.position.1 -= 1;
+        }
+    }
+
+    pub fn move_down(&mut self, map: &Maps) {
+        if self.position.1 < map.height() - 1 && map.is_empty(self.position.0, self.position.1 + 1) {
+            self.position.1 += 1;
+        }
+    }
+
+    pub fn move_left(&mut self, map: &Maps) {
+        if self.position.0 > 0 && map.is_empty(self.position.0 - 1, self.position.1) {
+            self.position.0 -= 1;
+        }
+    }
+
+    pub fn move_right(&mut self, map: &Maps) {
+        if self.position.0 < map.width() - 1 && map.is_empty(self.position.0 + 1, self.position.1) {
+            self.position.0 += 1;
         }
     }
 }
