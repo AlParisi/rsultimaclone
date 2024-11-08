@@ -17,7 +17,7 @@ pub struct Player {
     pub status: PlayerStatus
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum PlayerStatus {
     Normal,
     InCombat,
@@ -150,5 +150,126 @@ impl Player {
         if self.position.0 < map.width() - 1 && map.is_empty(self.position.0 + 1, self.position.1) {
             self.position.0 += 1;
         }
+    }
+}
+
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_player() {
+        let player = Player::new("Test Player");
+        assert_eq!(player.name, "Test Player");
+        assert_eq!(player.health, 100);
+        assert_eq!(player.mana, 50);
+        assert_eq!(player.level, 1);
+        assert_eq!(player.experience, 0);
+        assert_eq!(player.strength, 10);
+        assert_eq!(player.agility, 8);
+        assert_eq!(player.charisma, 5);
+        assert_eq!(player.inventory.len(), 0);
+        assert_eq!(player.position, (1, 1));
+        assert_eq!(player.map_limits, (100, 100));
+    }
+
+    #[test]
+    fn test_move_player() {
+        let mut player = Player::new("Test Player");
+        player.move_player(1, 1);
+        assert_eq!(player.position, (2, 2));
+
+        player.move_player(100, 100);
+        assert_ne!(player.position, (102, 102));
+    }
+
+    #[test]
+    fn test_gain_experience() {
+        let mut player = Player::new("Test Player");
+        player.gain_experience(50);
+        assert_eq!(player.experience, 50);
+        assert_eq!(player.level, 1);
+
+        player.gain_experience(50);
+        assert_eq!(player.experience, 0);
+        assert_eq!(player.level, 2);
+        assert_eq!(player.health, 120);
+        assert_eq!(player.mana, 60);
+        assert_eq!(player.strength, 12);
+        assert_eq!(player.agility, 9);
+        assert_eq!(player.charisma, 6);
+    }
+
+    #[test]
+    fn test_set_status() {
+        let mut player = Player::new("Test Player");
+        player.set_status(PlayerStatus::InCombat);
+        assert_eq!(player.status, PlayerStatus::InCombat);
+
+        player.set_status(PlayerStatus::Exhausted);
+        assert_eq!(player.status, PlayerStatus::Exhausted);
+    }
+
+    #[test]
+    fn test_check_status() {
+        let mut player = Player::new("Test Player");
+        player.set_status(PlayerStatus::Normal);
+        player.check_status();
+
+        player.set_status(PlayerStatus::InCombat);
+        player.check_status();
+
+        player.set_status(PlayerStatus::Exhausted);
+        player.check_status();
+
+        player.set_status(PlayerStatus::Injured);
+        player.check_status();
+    }
+
+    #[test]
+    fn test_engage_in_combat() {
+        let mut player = Player::new("Test Player");
+        let mut npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+
+        let combat_log = player.engage_in_combat(&mut npc);
+        assert!(combat_log.contains("You dealt"));
+        assert!(combat_log.contains("The NPC dealt"));
+
+        assert!(player.health <= 100);
+        assert!(npc.health <= 50);
+    }
+
+    #[test]
+    fn test_train_player() {
+        let mut player = Player::new("Test Player");
+        let original_strength = player.strength;
+        let original_agility = player.agility;
+
+        Player::train_player(&mut player);
+        assert_eq!(player.strength, original_strength + 1);
+        assert_eq!(player.agility, original_agility + 1);
+    }
+
+    #[test]
+    fn test_move_up_down_left_right() {
+        let mut player = Player::new("Test Player");
+        let mut maps = Maps::new(10, 10);
+
+        // Move up
+        player.position = (5, 5);
+        player.move_up(&maps);
+        assert_eq!(player.position, (5, 4));
+
+        // Move down
+        player.move_down(&maps);
+        assert_eq!(player.position, (5, 5));
+
+        // Move left
+        player.move_left(&maps);
+        assert_eq!(player.position, (4, 5));
+
+        // Move right
+        player.move_right(&maps);
+        assert_eq!(player.position, (5, 5));
     }
 }

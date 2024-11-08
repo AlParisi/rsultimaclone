@@ -18,6 +18,8 @@ impl Maps {
         }
     }
     pub fn resize(&mut self, width: usize, height: usize) {
+        self.width = width;
+        self.height= height;
         self.grid = vec![vec![TileContent::Empty; width]; height];
     }
 
@@ -110,4 +112,131 @@ impl Maps {
         self.height = frame_height;
         self.grid = vec![vec![TileContent::Empty; self.width]; self.height];
     }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_maps() {
+        let maps = Maps::new(10, 10);
+        assert_eq!(maps.width, 10);
+        assert_eq!(maps.height, 10);
+        assert_eq!(maps.grid.len(), 10);
+        assert_eq!(maps.grid[0].len(), 10);
+        assert_eq!(maps.grid[0][0], TileContent::Empty);
+    }
+
+
+    #[test]
+    fn test_resize_maps() {
+        let mut maps = Maps::new(10, 10);
+        maps.resize(20, 15);
+        assert_eq!(maps.width, 20);
+        assert_eq!(maps.height, 15);
+        assert_eq!(maps.grid.len(), 15);
+        assert_eq!(maps.grid[0].len(), 20);
+        assert_eq!(maps.grid[0][0], TileContent::Empty);
+    }
+
+    #[test]
+    fn test_width_and_height() {
+        let maps = Maps::new(8, 12);
+        assert_eq!(maps.width(), 8);
+        assert_eq!(maps.height(), 12);
+    }
+
+    #[test]
+    fn test_in_bounds() {
+        let maps = Maps::new(10, 10);
+        assert!(maps.in_bounds(5, 5));
+        assert!(!maps.in_bounds(10, 10));
+        assert!(!maps.in_bounds(0, 10));
+        assert!(!maps.in_bounds(10, 0));
+    }
+
+    #[test]
+    fn test_is_empty() {
+        let mut maps = Maps::new(5, 5);
+        assert!(maps.is_empty(2, 2));
+        maps.grid[2][2] = TileContent::Player;
+        assert!(!maps.is_empty(2, 2));
+    }
+
+    #[test]
+    fn test_place_player() {
+        let mut maps = Maps::new(10, 10);
+        let mut player = Player::new("Test Player");
+        maps.place_player(&mut player, 5, 5);
+        assert_eq!(maps.grid[5][5], TileContent::Player);
+        assert_eq!(player.position, (5, 5));
+    }
+
+    #[test]
+    fn test_place_npc() {
+        let mut maps = Maps::new(10, 10);
+        let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+        maps.place_npc(npc, 3, 3);
+        assert_eq!(maps.grid[3][3], TileContent::NPC);
+    }
+
+    #[test]
+    fn test_move_player() {
+        let mut maps = Maps::new(10, 10);
+        let mut player = Player::new("Test Player");
+        maps.place_player(&mut player, 5, 5);
+
+        maps.move_player(&mut player, 1, 1);
+        assert_eq!(maps.grid[6][6], TileContent::Player);
+        assert_eq!(player.position, (6, 6));
+    }
+
+    #[test]
+    fn test_find_nearby_npc() {
+        let mut maps = Maps::new(10, 10);
+        let npc1 = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+        let npc2 = NPC::new("Test NPC", "You shall not pass!", (7, 7), 50);
+
+        let npcs = vec![npc1, npc2];
+
+        assert_eq!(maps.find_nearby_npc((5, 5), &npcs), Some(0));
+        assert_ne!(maps.find_nearby_npc((3, 3), &npcs), Some(1));
+        assert_eq!(maps.find_nearby_npc((1, 1), &npcs), None);
+    }
+
+    #[test]
+    fn test_update_player_position() {
+        let mut maps = Maps::new(10, 10);
+        maps.update_player_position(5, 5);
+        assert_eq!(maps.grid[5][5], TileContent::Player);
+
+        maps.update_player_position(7, 7);
+        assert_eq!(maps.grid[7][7], TileContent::Player);
+    }
+
+    #[test]
+    fn test_draw() {
+        let mut maps = Maps::new(10, 10);
+        let mut player = Player::new("Test Player");
+        let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+        let npcs = vec![npc];
+
+        let map_string = maps.draw(player.position, &npcs);
+        assert!(map_string.contains("."));
+        assert!(map_string.contains("@"));
+        assert!(map_string.contains("N"));
+    }
+
+    #[test]
+    fn test_resize_to_frame() {
+        let mut maps = Maps::new(20, 20);
+        maps.resize_to_frame(10, 15);
+        assert_eq!(maps.width, 10);
+        assert_eq!(maps.height, 15);
+        assert_eq!(maps.grid.len(), 15);
+        assert_eq!(maps.grid[0].len(), 10);
+    }
+
 }
