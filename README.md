@@ -44,7 +44,7 @@ To improve the gameplay experience, we’ve implemented real-time movement comma
 
 This structure ensures a smoother gameplay experience, with instant responses to movement inputs while preserving the Command Window for complex interactions.
 
-
+ 
 ### Screen
 ```console
 ┌Map──────────────────────────────────────────────────────────────────────────────────────────────┐┌Player Stats─────────────────────────────┐

@@ -109,42 +109,29 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
                     }
                 }
 
-                KeyCode::Char('q') => {
-                    break;
+                KeyCode::Char('f') => {
+                    if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
+                        let npc = &mut npcs[npc_index];
+                        let combat_log = player.engage_in_combat(npc);
+
+                        if npc.health <= 0 {
+                            npcs.remove(npc_index);
+                            Player::gain_experience(player, 10);
+                        }
+                        ui_state.add_log(combat_log)
+                    }
                 }
 
-                KeyCode::Enter => {
-                    let command = ui_state.command_input.trim().to_lowercase();
-                    ui_state.command_input.clear();
+                KeyCode::Char('e') => {
+                    if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
+                        let npc = &mut npcs[npc_index];
+                        let combat_log = npc.interact();
+                        ui_state.add_log(combat_log)
+                    }
+                }
 
-                    let log_message = match command.as_str() {
-                        "f" => {
-                            if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
-                                let npc = &mut npcs[npc_index];
-                                let combat_log = player.engage_in_combat(npc);
-
-                                if npc.health <= 0 {
-                                    npcs.remove(npc_index);
-                                    Player::gain_experience(player, 10);
-                                }
-                                combat_log
-                            } else {
-                                "No NPC nearby to engage in combat!".to_string()
-                            }
-                        }
-                        "e" => {
-                            if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
-                                let npc = &mut npcs[npc_index];
-                                let combat_log = npc.interact();
-                                combat_log
-                            } else {
-                                "No NPC nearby to talk to!".to_string()
-                            }
-                        },
-                        _ => "Invalid command! Type 'e' talk to or 'f' for combat.".to_string()
-                    };
-
-                    ui_state.add_log(log_message);
+                KeyCode::Char('q') => {
+                    break;
                 }
 
                 KeyCode::Char(c) => {
