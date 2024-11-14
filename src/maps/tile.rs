@@ -3,6 +3,7 @@ pub enum TileContent {
     Empty,
     Player,
     NPC,
+    Item,
     Obstacle
 }
 
@@ -18,6 +19,7 @@ impl TileContent {
             TileContent::Player => '@',
             TileContent::NPC => 'N',
             TileContent::Empty => '.',
+            TileContent::Item => 'I',
             TileContent::Obstacle => '#'
         }
     }

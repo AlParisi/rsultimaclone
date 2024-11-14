@@ -11,8 +11,9 @@ use ratatui::{
 };
 use std::io::{self};
 use std::collections::VecDeque;
+use crate::inventory::item::Item;
 
-pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Result<(), io::Error> {
+pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &mut Vec<Item>) -> Result<(), io::Error> {
     let mut stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
@@ -43,7 +44,7 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Resul
             let map_area = left_chunks[0];
             map.resize_to_frame(map_area.width as usize, map_area.height as usize);
 
-            let map_display = map.draw(player.position, npcs);
+            let map_display = map.draw(player.position, npcs, items);
             let map_widget = Paragraph::new(map_display)
                 .style(Style::default().fg(Color::White))
                 .block(Block::default().borders(Borders::ALL).title("Map"));
@@ -114,6 +115,15 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Resul
                                 combat_log
                             } else {
                                 "No NPC nearby to talk to!".to_string()
+                            }
+                        },
+                        "g" => {
+                            if let Some(item_index) = map.find_nearby(player.position, items) {
+                                let item = &mut items[item_index];
+                                let combat_log = Item::add_item(player, item.clone());
+                                combat_log
+                            } else {
+                                "I didn't find any objects here!".to_string()
                             }
                         },
                         "t" => Player::train_player(player),

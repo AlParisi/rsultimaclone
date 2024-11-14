@@ -1,6 +1,7 @@
 use crate::maps::tile::{TileContent};
 use crate::entities::player::Player;
 use crate::entities::npc::NPC;
+use crate::inventory::item::Item;
 
 pub struct Maps {
     pub width: usize,
@@ -46,14 +47,20 @@ impl Maps {
             (npc_x as isize - player_x as isize).abs() <= 1 && (npc_y as isize - player_y as isize).abs() <= 1
         })
     }
-
+    pub fn find_nearby(&self, player_position: (usize, usize), items: &mut Vec<Item>) -> Option<usize> {
+        items.iter().position(|item| {
+            let (item_x, item_y) = item.position;
+            let (player_x, player_y) = player_position;
+            (item_x as isize - player_x as isize).abs() <= 1 && (item_y as isize - player_y as isize).abs() <= 1
+        })
+    }
     pub fn update_player_position(&mut self, x: usize, y: usize) {
         if self.in_bounds(x, y){
             self.grid[y][x] = TileContent::Player;
         }
     }
 
-    pub fn draw(&self, player_position: (usize, usize), npcs: &Vec<NPC>) -> String {
+    pub fn draw(&self, player_position: (usize, usize), npcs: &Vec<NPC>, items: &Vec<Item>) -> String {
         let mut map_string = String::new();
 
         for y in 0..self.height {
@@ -62,7 +69,9 @@ impl Maps {
                     TileContent::Player
                 } else if npcs.iter().any(|npc| npc.position == (x, y)) {
                     TileContent::NPC
-                } else {
+                } else if items.iter().any(|item| item.position == (x, y)) {
+                    TileContent::Item
+                }else {
                     TileContent::Empty
                 };
 
@@ -160,12 +169,16 @@ mod tests {
         let mut maps = Maps::new(10, 10);
         let mut player = Player::new("Test Player");
         let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50, 10);
-        let npcs = vec![npc];
+        let item = Item::new("Test Item", (6, 6));
 
-        let map_string = maps.draw(player.position, &npcs);
+        let npcs = vec![npc];
+        let items = vec![item];
+
+        let map_string = maps.draw(player.position, &npcs, &items);
         assert!(map_string.contains("."));
         assert!(map_string.contains("@"));
         assert!(map_string.contains("N"));
+        assert!(map_string.contains("I"));
     }
 
     #[test]

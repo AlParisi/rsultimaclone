@@ -1,30 +1,32 @@
+use ratatui::layout::Positions;
 use crate::entities::player::Player;
 
+#[derive(Debug, Clone)]
 pub struct Item {
     pub name: String,
-    pub value: i32
+    pub position: (usize, usize)
 }
 
 impl Item {
-    pub fn new(name: &str, value: i32) -> Self {
+    pub fn new(name: &str, position: (usize, usize)) -> Self {
         Self {
             name: name.to_string(),
-            value
+            position
         }
     }
 
-    pub fn add_item(player: &mut Player, item: Item) {
-        println!("You found a new item: {}.", item.name);
+    pub fn add_item(player: &mut Player, item: Item) -> String{
         player.inventory.push(item);
+        "You found a new item!".to_string()
     }
 
-    pub fn use_item(player: &mut Player, item_name: &str) {
+    pub fn use_item(player: &mut Player, item_name: &str) -> String {
         if let Some(index) = player.inventory.iter().position(|item| item.name == item_name) {
             let item = player.inventory.remove(index);
-            println!("You used item: {}.", item.name);
             apply_item_effect(player, &item);
+            "You used item".to_string()
         } else {
-            println!("Object not found on inventary.");
+            "Object not found on inventary.".to_string()
         }
     }
 
@@ -51,25 +53,23 @@ mod tests {
 
     #[test]
     fn test_new_item() {
-        let item = Item::new("Health Potion", 10);
+        let item = Item::new("Health Potion", (10, 10));
         assert_eq!(item.name, "Health Potion");
-        assert_eq!(item.value, 10);
     }
 
     #[test]
     fn test_add_item() {
         let mut player = Player::new("Test Player");
-        let item = Item::new("Health Potion", 10);
+        let item = Item::new("Health Potion", (10, 10));
         Item::add_item(&mut player, item);
         assert_eq!(player.inventory.len(), 1);
         assert_eq!(player.inventory[0].name, "Health Potion");
-        assert_eq!(player.inventory[0].value, 10);
     }
 
     #[test]
     fn test_use_item() {
         let mut player = Player::new("Test Player");
-        let potion = Item::new("Health Potion", 10);
+        let potion = Item::new("Health Potion", (10, 10));
         Item::add_item(&mut player, potion);
 
         Item::use_item(&mut player, "Health Potion");
@@ -84,8 +84,8 @@ mod tests {
     #[test]
     fn test_apply_item_effect() {
         let mut player = Player::new("Test Player");
-        let health_potion = Item::new("Health Potion", 10);
-        let mana_potion = Item::new("Mana Potion", 5);
+        let health_potion = Item::new("Health Potion", (10, 10));
+        let mana_potion = Item::new("Mana Potion", (5, 5));
 
         apply_item_effect(&mut player, &health_potion);
         assert_eq!(player.health, 120);
