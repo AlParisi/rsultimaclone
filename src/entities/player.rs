@@ -107,10 +107,21 @@ impl Player {
         combat_log
     }
 
-    pub fn train_player(player: &mut Player) -> String{
+    pub fn train_player(player: &mut Player){
         player.strength += 1;
         player.agility += 1;
-        "You train to improve your strength and agility.".to_string()
+    }
+
+    pub fn get_inventory(&self) -> String {
+        if self.inventory.is_empty() {
+            "".to_string()
+        } else {
+            self.inventory.iter()
+                .enumerate()
+                .map(|(i, item)| format!("{}. {}", i + 1, item.name))
+                    .collect::<Vec<String>>()
+                    .join("\n")
+        }
     }
 
     pub fn move_up(&mut self, map: &Maps) {

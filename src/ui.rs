@@ -41,6 +41,11 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
                 .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
                 .split(chunks[0]);
 
+            let right_chunks = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+                .split(left_chunks[1]);
+
             let map_area = left_chunks[0];
             map.resize_to_frame(map_area.width as usize, map_area.height as usize);
 
@@ -57,11 +62,17 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
             let stats_block = Paragraph::new(stats)
                 .style(Style::default().fg(Color::Green))
                 .block(Block::default().borders(Borders::ALL).title("Player Stats"));
-            f.render_widget(stats_block, left_chunks[1]);
+            f.render_widget(stats_block, right_chunks[0]);
+
+            let inventory = Player::get_inventory(player);
+            let inventory_paragraph = Paragraph::new(inventory)
+                .style(Style::default().fg(Color::Yellow))
+                .block(Block::default().borders(Borders::ALL).title("Inventary"));
+            f.render_widget(inventory_paragraph, right_chunks[1]);
 
             let command_output = format!("> {}", ui_state.get_log());
             let command_input_display = Paragraph::new(command_output)
-                .style(Style::default().fg(Color::White))
+                .style(Style::default().fg(Color::Blue))
                 .block(Block::default().borders(Borders::ALL).title("Commands"));
             f.render_widget(command_input_display, chunks[1]);
         })?;
@@ -83,6 +94,19 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
                 KeyCode::Char('d') => {
                     player.move_right(map);
                     ui_state.add_log("Player moved right".to_string());
+                }
+
+                KeyCode::Char('t') => {
+                    Player::train_player(player);
+                    ui_state.add_log("You train to improve your strength and agility.".to_string());
+                }
+
+                KeyCode::Char('g') => {
+                    if let Some(item_index) = map.find_nearby(player.position, items) {
+                        let item = &mut items[item_index];
+                        let combat_log = Item::add_item(player, item.clone());
+                        ui_state.add_log(combat_log);
+                    }
                 }
 
                 KeyCode::Char('q') => {
@@ -117,16 +141,6 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
                                 "No NPC nearby to talk to!".to_string()
                             }
                         },
-                        "g" => {
-                            if let Some(item_index) = map.find_nearby(player.position, items) {
-                                let item = &mut items[item_index];
-                                let combat_log = Item::add_item(player, item.clone());
-                                combat_log
-                            } else {
-                                "I didn't find any objects here!".to_string()
-                            }
-                        },
-                        "t" => Player::train_player(player),
                         _ => "Invalid command! Type 'e' talk to or 'f' for combat.".to_string()
                     };
 
