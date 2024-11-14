@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct NPC {
     pub name: String,
     pub dialogue: String,
@@ -7,12 +8,12 @@ pub struct NPC {
 }
 
 impl NPC {
-    pub fn new(name: &str, dialogue: &str, position: (usize, usize), strength: i32) -> Self {
+    pub fn new(name: &str, dialogue: &str, position: (usize, usize), health: i32, strength: i32) -> Self {
         Self {
             name: name.to_string(),
             dialogue: dialogue.to_string(),
             position,
-            health: 30,
+            health,
             strength
         }
     }
@@ -21,7 +22,7 @@ impl NPC {
         self.strength
     }
 
-    pub fn interact(&self) {
-        println!("{} say: {}", self.name, self.dialogue);
+    pub fn interact(&self) -> String{
+        self.dialogue.clone()
     }
 }

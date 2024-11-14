@@ -13,7 +13,7 @@ pub struct Player {
     pub charisma: i32,
     pub inventory: Vec<Item>,
     pub position: (usize, usize),
-    pub map_limits: (usize, usize),
+    //pub map_limits: (usize, usize),
     pub status: PlayerStatus
 }
 
@@ -37,26 +37,13 @@ impl Player {
             charisma: 5,
             inventory: Vec::new(),
             position: (1, 1),
-            map_limits: (100, 100),
+            //map_limits: (100, 100),
             status: PlayerStatus::Normal,
-        }
-    }
-
-    pub fn move_player(&mut self, dx: usize, dy: usize) {
-        let new_x = self.position.0 + dx;
-        let new_y = self.position.1 + dy;
-
-        if new_x < 0 || new_x >= self.map_limits.0 || new_y < 0 || new_y >= self.map_limits.1 {
-            println!("You can't move in that direction, you're at the edge of the maps.");
-        } else {
-            self.position = (new_x, new_y);
-            println!("You moved to the position: ({}, {})", self.position.0, self.position.1);
         }
     }
 
     pub fn gain_experience(&mut self, amount: u32) {
         self.experience += amount;
-        println!("You gained {} point experience.", amount);
 
         let required_experience = self.level * 100;
         if self.experience >= required_experience {
@@ -72,7 +59,6 @@ impl Player {
         self.strength += 2;
         self.agility += 1;
         self.charisma += 1;
-        println!("Congratulation! You achieved a level up: now your level is {}.", self.level);
     }
 
     pub fn set_status(&mut self, status: PlayerStatus) {
@@ -121,33 +107,36 @@ impl Player {
         combat_log
     }
 
-    pub fn train_player(player: &mut Player) {
-        println!("You train to improve your strength and agility.");
+    pub fn train_player(player: &mut Player) -> String{
         player.strength += 1;
         player.agility += 1;
-        println!("Your strength is now {} and your agility is now {}.", player.strength, player.agility);
+        "You train to improve your strength and agility.".to_string()
     }
 
     pub fn move_up(&mut self, map: &Maps) {
-        if self.position.1 > 0 && map.is_empty(self.position.0, self.position.1 - 1) {
-            self.position.1 -= 1;
-        }
+            if self.position.1 > 0
+                && map.is_empty(self.position.0, self.position.1 - 1){
+                self.position.1 -= 1;
+            }
     }
 
     pub fn move_down(&mut self, map: &Maps) {
-        if self.position.1 < map.height() - 1 && map.is_empty(self.position.0, self.position.1 + 1) {
+        if self.position.1 < map.height() - 1
+            && map.is_empty(self.position.0, self.position.1 + 1) {
             self.position.1 += 1;
         }
     }
 
     pub fn move_left(&mut self, map: &Maps) {
-        if self.position.0 > 0 && map.is_empty(self.position.0 - 1, self.position.1) {
+        if self.position.0 > 0
+            && map.is_empty(self.position.0 - 1, self.position.1){
             self.position.0 -= 1;
         }
     }
 
     pub fn move_right(&mut self, map: &Maps) {
-        if self.position.0 < map.width() - 1 && map.is_empty(self.position.0 + 1, self.position.1) {
+        if self.position.0 < map.width() - 1
+            && map.is_empty(self.position.0 + 1, self.position.1){
             self.position.0 += 1;
         }
     }
@@ -170,17 +159,7 @@ mod tests {
         assert_eq!(player.charisma, 5);
         assert_eq!(player.inventory.len(), 0);
         assert_eq!(player.position, (1, 1));
-        assert_eq!(player.map_limits, (100, 100));
-    }
-
-    #[test]
-    fn test_move_player() {
-        let mut player = Player::new("Test Player");
-        player.move_player(1, 1);
-        assert_eq!(player.position, (2, 2));
-
-        player.move_player(100, 100);
-        assert_ne!(player.position, (102, 102));
+        //assert_eq!(player.map_limits, (100, 100));
     }
 
     #[test]
@@ -229,7 +208,7 @@ mod tests {
     #[test]
     fn test_engage_in_combat() {
         let mut player = Player::new("Test Player");
-        let mut npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+        let mut npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50, 10);
 
         let combat_log = player.engage_in_combat(&mut npc);
         assert!(combat_log.contains("You dealt"));

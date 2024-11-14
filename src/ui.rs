@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Style},
     widgets::{Block, Borders, Paragraph},
-    Terminal,
+    Terminal
 };
 use std::io::{self};
 use std::collections::VecDeque;
@@ -27,8 +27,6 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Resul
         let map_width = (size.width * 70 / 100) as usize;
         let map_height = (size.height * 80 / 100) as usize;
         map.resize(map_width, map_height);
-        map.update_player_position(player.position.0, player.position.1);
-
         ui_state.max_log_lines = (size.height * 20 / 100) as usize;
 
         terminal.draw(|f| {
@@ -95,21 +93,31 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Resul
                     ui_state.command_input.clear();
 
                     let log_message = match command.as_str() {
-                        "engage" => {
+                        "f" => {
                             if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
                                 let npc = &mut npcs[npc_index];
                                 let combat_log = player.engage_in_combat(npc);
 
                                 if npc.health <= 0 {
                                     npcs.remove(npc_index);
+                                    Player::gain_experience(player, 10);
                                 }
                                 combat_log
                             } else {
                                 "No NPC nearby to engage in combat!".to_string()
                             }
                         }
-                        "fight" => "Initiating fight...".to_string(),
-                        _ => "Invalid command! Type 'engage' or 'fight' for combat.".to_string(),
+                        "e" => {
+                            if let Some(npc_index) = map.find_nearby_npc(player.position, npcs) {
+                                let npc = &mut npcs[npc_index];
+                                let combat_log = npc.interact();
+                                combat_log
+                            } else {
+                                "No NPC nearby to talk to!".to_string()
+                            }
+                        },
+                        "t" => Player::train_player(player),
+                        _ => "Invalid command! Type 'e' talk to or 'f' for combat.".to_string()
                     };
 
                     ui_state.add_log(log_message);
@@ -121,7 +129,7 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>) -> Resul
                 KeyCode::Backspace => {
                     ui_state.command_input.pop();
                 }
-                _ => (),
+                _ => ()
             }
 
             map.update_player_position(player.position.0, player.position.1);
@@ -149,7 +157,7 @@ impl UIState {
     }
 
     pub fn add_log(&mut self, message: String) {
-        if self.log_buffer.len() == self.max_log_lines {
+        if self.log_buffer.len() > 0  {
             self.log_buffer.pop_front();
         }
         self.log_buffer.push_back(message)

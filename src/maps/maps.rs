@@ -14,7 +14,7 @@ impl Maps {
         Self {
             width,
             height,
-            grid: vec![vec![TileContent::Empty; width]; height],
+            grid: vec![vec![TileContent::Empty; width]; height]
         }
     }
     pub fn resize(&mut self, width: usize, height: usize) {
@@ -31,45 +31,12 @@ impl Maps {
         self.grid.len()
     }
 
-    fn in_bounds(&self, x: usize, y: usize) -> bool {
-        x >= 0 && x < self.width && y >= 0 && y < self.height
+    pub fn in_bounds(&self, x: usize, y: usize) -> bool {
+        x <= self.width && y <= self.height
     }
 
     pub fn is_empty(&self, x: usize, y: usize) -> bool {
         self.grid[y][x] == TileContent::Empty
-    }
-
-    pub fn place_player(&mut self, player: &mut Player, x: usize, y: usize) {
-        if self.in_bounds(x, y) {
-            self.grid[y][x] = TileContent::Player;
-            player.position = (x, y);
-            println!("The player was placed in ({}, {}).", x, y);
-        } else {
-            println!("Location outside the limits of the map.");
-        }
-    }
-
-    pub fn place_npc(&mut self, npc: NPC, x: usize, y: usize) {
-        if self.in_bounds(x, y) {
-            self.grid[y][x] = TileContent::NPC;
-            println!("NPC '{}' was placed in ({}, {}).", npc.name, x, y);
-        } else {
-            println!("Location outside the limits of the map.");
-        }
-    }
-
-    pub fn move_player(&mut self, player: &mut Player, dx: usize, dy: usize) {
-        let new_x = player.position.0 + dx;
-        let new_y = player.position.1 + dy;
-
-        if self.in_bounds(new_x, new_y) {
-            //Free the old position
-            self.grid[player.position.1][player.position.0] = TileContent::Empty;
-            //Update the new location
-            self.place_player(player, new_x, new_y);
-        } else {
-            println!("You can't move in that direction, you're at the edge of the map.");
-        }
     }
 
     pub fn find_nearby_npc(&self, player_position: (usize, usize), npcs: &Vec<NPC>) -> Option<usize> {
@@ -81,7 +48,7 @@ impl Maps {
     }
 
     pub fn update_player_position(&mut self, x: usize, y: usize) {
-        if x < self.width && y < self.height {
+        if self.in_bounds(x, y){
             self.grid[y][x] = TileContent::Player;
         }
     }
@@ -166,38 +133,10 @@ mod tests {
     }
 
     #[test]
-    fn test_place_player() {
-        let mut maps = Maps::new(10, 10);
-        let mut player = Player::new("Test Player");
-        maps.place_player(&mut player, 5, 5);
-        assert_eq!(maps.grid[5][5], TileContent::Player);
-        assert_eq!(player.position, (5, 5));
-    }
-
-    #[test]
-    fn test_place_npc() {
-        let mut maps = Maps::new(10, 10);
-        let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
-        maps.place_npc(npc, 3, 3);
-        assert_eq!(maps.grid[3][3], TileContent::NPC);
-    }
-
-    #[test]
-    fn test_move_player() {
-        let mut maps = Maps::new(10, 10);
-        let mut player = Player::new("Test Player");
-        maps.place_player(&mut player, 5, 5);
-
-        maps.move_player(&mut player, 1, 1);
-        assert_eq!(maps.grid[6][6], TileContent::Player);
-        assert_eq!(player.position, (6, 6));
-    }
-
-    #[test]
     fn test_find_nearby_npc() {
         let mut maps = Maps::new(10, 10);
-        let npc1 = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
-        let npc2 = NPC::new("Test NPC", "You shall not pass!", (7, 7), 50);
+        let npc1 = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50, 10);
+        let npc2 = NPC::new("Test NPC", "You shall not pass!", (7, 7), 50, 10);
 
         let npcs = vec![npc1, npc2];
 
@@ -220,7 +159,7 @@ mod tests {
     fn test_draw() {
         let mut maps = Maps::new(10, 10);
         let mut player = Player::new("Test Player");
-        let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50);
+        let npc = NPC::new("Test NPC", "You shall not pass!", (5, 5), 50, 10);
         let npcs = vec![npc];
 
         let map_string = maps.draw(player.position, &npcs);

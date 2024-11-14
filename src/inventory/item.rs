@@ -2,14 +2,14 @@ use crate::entities::player::Player;
 
 pub struct Item {
     pub name: String,
-    pub value: i32,
+    pub value: i32
 }
 
 impl Item {
     pub fn new(name: &str, value: i32) -> Self {
         Self {
             name: name.to_string(),
-            value,
+            value
         }
     }
 
@@ -40,7 +40,7 @@ fn apply_item_effect(player: &mut Player, item: &Item) {
             player.mana += 15;
             println!("Your mana increased by 15 points. Current Mana: {}.", player.mana);
         },
-        _ => println!("Object not useful"),
+        _ => println!("Object not useful")
     }
 }
 

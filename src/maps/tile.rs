@@ -11,14 +11,6 @@ pub struct Tile {
     pub description: String
 }
 
-impl Tile {
-    pub fn new(description: &str) -> Self {
-        Self {
-            content: TileContent::Empty,
-            description: description.to_string()
-        }
-    }
-}
 
 impl TileContent {
     pub(crate) fn to_char(self) -> char {
@@ -35,12 +27,6 @@ impl TileContent {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_new_tile() {
-        let tile = Tile::new("Empty");
-        assert_eq!(tile.content, TileContent::Empty);
-    }
 
     #[test]
     fn test_to_char() {
