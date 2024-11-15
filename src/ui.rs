@@ -105,6 +105,7 @@ pub fn run_ui(player: &mut Player, map: &mut Maps, npcs: &mut Vec<NPC>, items: &
                     if let Some(item_index) = map.find_nearby(player.position, items) {
                         let item = &mut items[item_index];
                         let combat_log = Item::add_item(player, item.clone());
+                        items.remove(item_index);
                         ui_state.add_log(combat_log);
                     }
                 }

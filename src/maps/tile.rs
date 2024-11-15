@@ -38,6 +38,8 @@ mod tests {
         assert_eq!(player_tile.to_char(), '@');
         let npc_tile = TileContent::NPC;
         assert_eq!(npc_tile.to_char(), 'N');
+        let item_tile = TileContent::Item;
+        assert_eq!(item_tile.to_char(), 'I');
         let obstacle_tile = TileContent::Obstacle;
         assert_eq!(obstacle_tile.to_char(), '#');
     }
